@@ -9,8 +9,18 @@ namespace McMsalConsoleApp
 {
     internal class Program
     {
+        static bool silentOnly = false;
+
         static void Main(string[] args)
         {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if(args[i].ToLower() == "silent")
+                {
+                    silentOnly = true;
+                }
+            }
+
             authenticate().Wait();
         }
         
@@ -24,7 +34,7 @@ namespace McMsalConsoleApp
             //   - for any Work or School accounts, or Microsoft personal account, use consumers
             //   - for Microsoft Personal account, use consumers
             const string ClientId = "b91b3560-b580-45cc-8bdb-86c06279f4c4";
-            //string ClientId = "3e3a9bda-6e1c-45a8-a945-1a1dd832aff6";
+            //const string ClientId = "3e3a9bda-6e1c-45a8-a945-1a1dd832aff6";
 
             // Note: Tenant is important for the quickstart.
             string Tenant = "consumers";
@@ -55,6 +65,11 @@ namespace McMsalConsoleApp
                 // A MsalUiRequiredException happened on AcquireTokenSilent. 
                 // This indicates you need to call AcquireTokenInteractive to acquire a token
                 System.Diagnostics.Debug.WriteLine($"MsalUiRequiredException: {ex.Message}");
+                if (silentOnly)
+                {
+                    Console.WriteLine( "error:interactive" );
+                    return;
+                }
 
                 try
                 {
