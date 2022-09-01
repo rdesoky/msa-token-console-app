@@ -10,6 +10,7 @@ namespace McMsalConsoleApp
     internal class Program
     {
         static bool silentOnly = false;
+        static bool makeGraphApiCall = true;
 
         static void Main(string[] args)
         {
@@ -18,6 +19,11 @@ namespace McMsalConsoleApp
                 if(args[i].ToLower() == "silent")
                 {
                     silentOnly = true;
+                }
+
+                if (args[i].ToLower() == "token")
+                {
+                    makeGraphApiCall = false;
                 }
             }
 
@@ -81,12 +87,15 @@ namespace McMsalConsoleApp
                 }
                 catch (MsalException msalex)
                 {
-                    Console.WriteLine( $"Error Acquiring Token:{newLine}{msalex}" );
+                    //Console.WriteLine( $"Error Acquiring Token:{newLine}{msalex}" );
+                    Console.WriteLine("error:" + msalex.ErrorCode);
+                    return;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine( $"Error Acquiring Token Silently:{newLine}{ex}" );
+                //Console.WriteLine( $"Error Acquiring Token Silently:{newLine}{ex}" );
+                Console.WriteLine("error:" + ex.Message);
                 return;
             }
 
@@ -106,11 +115,19 @@ namespace McMsalConsoleApp
                     $"Token Expires: {authResult.ExpiresOn.ToLocalTime()}"
                 );
 
-                var content = await GetHttpContentWithToken(graphAPIEndpoint, authResult.AccessToken);
-                Console.WriteLine(
-                    "=====" + newLine +
-                    $"Graph API (https://graph.microsoft.com/v1.0/me) results:\n:{content}"
-                );
+                if (makeGraphApiCall)
+                {
+
+                    var content = await GetHttpContentWithToken(graphAPIEndpoint, authResult.AccessToken);
+                    Console.WriteLine(
+                        "=====" + newLine +
+                        $"Graph API (https://graph.microsoft.com/v1.0/me) results:\n:{content}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("error:failed");
             }
 
         }
