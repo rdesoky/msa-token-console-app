@@ -4,48 +4,51 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Desktop;
 
-
 namespace McMsalConsoleApp
 {
     internal class Program
     {
-        static bool silentOnly = false;
-        static bool makeGraphApiCall = true;
 
         static void Main(string[] args)
         {
-            for (int i = 0; i < args.Length; i++)
-            {
-                if(args[i].ToLower() == "silent")
-                {
+            bool silentOnly = false;
+            bool makeGraphApiCall = true;
+            
+            for (int i = 0; i < args.Length; i++) {
+                
+                if(args[i].ToLower() == "silent") {
                     silentOnly = true;
                 }
 
-                if (args[i].ToLower() == "token")
-                {
+                if (args[i].ToLower() == "token") {
                     makeGraphApiCall = false;
                 }
             }
 
-            authenticate().Wait();
-        }
-        
-        static async Task authenticate() {
-            // Below are the clientId (Application Id) of your app registration and the tenant information. 
-            // You have to replace:
-            // - the content of ClientID with the Application Id for your app registration
-            // - The content of Tenant by the information about the accounts allowed to sign-in in your application:
-            //   - For Work or School account in your org, use your tenant ID, or domain
-            //   - for any Work or School accounts, use organizations
-            //   - for any Work or School accounts, or Microsoft personal account, use consumers
-            //   - for Microsoft Personal account, use consumers
-            const string ClientId = "b91b3560-b580-45cc-8bdb-86c06279f4c4";
-            //const string ClientId = "3e3a9bda-6e1c-45a8-a945-1a1dd832aff6";
+            new Program().authenticate(silentOnly, makeGraphApiCall).Wait();
 
-            // Note: Tenant is important for the quickstart.
-            string Tenant = "consumers";
-            string Instance = "https://login.microsoftonline.com/";
-            string newLine = Environment.NewLine;
+        }
+
+        // Below are the clientId (Application Id) of your app registration and the tenant information. 
+        // You have to replace:
+        // - the content of ClientID with the Application Id for your app registration
+        // - The content of Tenant by the information about the accounts allowed to sign-in in your application:
+        //   - For Work or School account in your org, use your tenant ID, or domain
+        //   - for any Work or School accounts, use organizations
+        //   - for any Work or School accounts, or Microsoft personal account, use consumers
+        //   - for Microsoft Personal account, use consumers
+        const string ClientId = "b91b3560-b580-45cc-8bdb-86c06279f4c4";
+        //const string ClientId = "3e3a9bda-6e1c-45a8-a945-1a1dd832aff6";
+
+        // Note: Tenant is important for the quickstart.
+        string Tenant = "consumers";
+        string Instance = "https://login.microsoftonline.com/";
+        string[] scopes = new string[] { "user.read" };
+
+        string newLine = Environment.NewLine;
+
+        async Task authenticate(bool silentOnly, bool makeGraphApiCall) {
+
 
             //create auth application
             var builder = PublicClientApplicationBuilder.Create(ClientId)
@@ -56,7 +59,6 @@ namespace McMsalConsoleApp
             IPublicClientApplication app = builder.Build();
 
             TokenCacheHelper.EnableSerialization(app.UserTokenCache);
-            string[] scopes = new string[] { "user.read" };
             AuthenticationResult authResult = null;
             IAccount account = PublicClientApplication.OperatingSystemAccount;
 
@@ -131,7 +133,7 @@ namespace McMsalConsoleApp
             }
 
         }
-        public static async Task<string> GetHttpContentWithToken(string url, string token)
+        async Task<string> GetHttpContentWithToken(string url, string token)
         {
             var httpClient = new System.Net.Http.HttpClient();
             System.Net.Http.HttpResponseMessage response;
